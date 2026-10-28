@@ -25,6 +25,8 @@ def _filtrar_dataframe(df: pd.DataFrame, inicio_str: str = None, fim_str: str = 
         
     return df_f
 
+from plotly.subplots import make_subplots
+
 def gerar_grafico_linha_tempo(df: pd.DataFrame, inicio: str, fim: str, cliente: str, plataforma: str) -> dict:
     df_f = _filtrar_dataframe(df, inicio, fim, cliente, plataforma)
     if df_f.empty:
@@ -32,9 +34,26 @@ def gerar_grafico_linha_tempo(df: pd.DataFrame, inicio: str, fim: str, cliente: 
         
     df_agrup = df_f.groupby('data')[['investimento', 'faturamento']].sum().reset_index()
     
-    fig = px.line(df_agrup, x='data', y=['investimento', 'faturamento'],
-                  labels={'value': 'Valor (R$)', 'data': 'Data', 'variable': 'Métrica'},
-                  color_discrete_map={'investimento': '#7C3AED', 'faturamento': '#10B981'})
+    # Criamos o gráfico usando Graph Objects para ter total controle das duas linhas
+    fig = go.Figure()
+
+    # Linha de Investimento (Roxo)
+    fig.add_trace(go.Scatter(
+        x=df_agrup['data'], 
+        y=df_agrup['investimento'],
+        name='Investimento',
+        mode='lines+markers',
+        line=dict(color='#7C3AED', width=3)
+    ))
+
+    # Linha de Faturamento (Verde)
+    fig.add_trace(go.Scatter(
+        x=df_agrup['data'], 
+        y=df_agrup['faturamento'],
+        name='Faturamento',
+        mode='lines+markers',
+        line=dict(color='#10B981', width=3)
+    ))
     
     fig.update_layout(
         title='Evolução Diária: Investimento x Faturamento',
@@ -42,7 +61,9 @@ def gerar_grafico_linha_tempo(df: pd.DataFrame, inicio: str, fim: str, cliente: 
         plot_bgcolor=PL_BG_COLOR,
         font_color='#F8FAFC',
         margin=dict(t=40, b=20, l=20, r=20),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        xaxis=dict(showgrid=True, gridcolor='#1E293B'),
+        yaxis=dict(showgrid=True, gridcolor='#1E293B')
     )
     return json.loads(fig.to_json())
 
