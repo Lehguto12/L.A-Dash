@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: la-dash
+    runtime: python
+    plan: free
+    rootDir: dashboard_nexus
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
