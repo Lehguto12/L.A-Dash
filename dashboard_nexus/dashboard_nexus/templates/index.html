@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Dashboard - Tráfego Pago</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para ícones e setas -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Plotly.js para os gráficos interativos -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- CABEÇALHO -->
+        <header class="header">
+            <div class="logo-area">
+                <div class="logo-placeholder">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h1>Nexus Liveshop Marketing</h1>
+                    <p>Dashboard de Performance & Tráfego Pago</p>
+                </div>
+            </div>
+
+            <!-- FILTROS -->
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label for="filtro-cliente">Cliente</label>
+                    <select id="filtro-cliente">
+                        <option value="Todos">Todos os Clientes</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filtro-plataforma">Plataforma</label>
+                    <select id="filtro-plataforma">
+                        <option value="Todas">Todas as Plataformas</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filtro-inicio">Início</label>
+                    <input type="date" id="filtro-inicio">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filtro-fim">Fim</label>
+                    <input type="date" id="filtro-fim">
+                </div>
+
+                <button id="btn-filtrar" class="btn-primary">
+                    <i class="fa-solid fa-filter"></i> Filtrar
+                </button>
+            </div>
+        </header>
+
+        <!-- CARDS DE KPI -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <span class="kpi-label">Investimento</span>
+                    <h2 id="kpi-investimento">R$ 0,00</h2>
+                    <span class="kpi-trend" id="trend-investimento"><i class="fa-solid fa-arrow-up"></i> 0% vs ant.</span>
+                </div>
+                <div class="kpi-icon bg-purple"><i class="fa-solid fa-wallet"></i></div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <span class="kpi-label">Faturamento</span>
+                    <h2 id="kpi-faturamento">R$ 0,00</h2>
+                    <span class="kpi-trend" id="trend-faturamento"><i class="fa-solid fa-arrow-up"></i> 0% vs ant.</span>
+                </div>
+                <div class="kpi-icon bg-green"><i class="fa-solid fa-sack-dollar"></i></div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <span class="kpi-label">ROAS</span>
+                    <h2 id="kpi-roas">0.00x</h2>
+                    <span class="kpi-trend" id="trend-roas"><i class="fa-solid fa-arrow-up"></i> 0% vs ant.</span>
+                </div>
+                <div class="kpi-icon bg-violet"><i class="fa-solid fa-chart-pie"></i></div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <span class="kpi-label">CPL (Custo/Lead)</span>
+                    <h2 id="kpi-cpl">R$ 0,00</h2>
+                    <span class="kpi-trend" id="trend-cpl"><i class="fa-solid fa-arrow-down"></i> 0% vs ant.</span>
+                </div>
+                <div class="kpi-icon bg-blue"><i class="fa-solid fa-user-plus"></i></div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <span class="kpi-label">CPA (Custo/Venda)</span>
+                    <h2 id="kpi-cpa">R$ 0,00</h2>
+                    <span class="kpi-trend" id="trend-cpa"><i class="fa-solid fa-arrow-down"></i> 0% vs ant.</span>
+                </div>
+                <div class="kpi-icon bg-orange"><i class="fa-solid fa-handshake"></i></div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-info">
+                    <span class="kpi-label">CTR (Taxa de Clique)</span>
+                    <h2 id="kpi-ctr">0.00%</h2>
+                    <span class="kpi-trend" id="trend-ctr"><i class="fa-solid fa-arrow-up"></i> 0% vs ant.</span>
+                </div>
+                <div class="kpi-icon bg-pink"><i class="fa-solid fa-bullseye"></i></div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE GRÁFICOS (FASE 3) -->
+        <section class="charts-grid-top">
+            <div class="chart-card full-width">
+                <div id="chart-linha-tempo"></div>
+            </div>
+        </section>
+
+        <section class="charts-grid-bottom">
+            <div class="chart-card">
+                <div id="chart-roas-clientes"></div>
+            </div>
+            <div class="chart-card">
+                <div id="chart-investimento-plataforma"></div>
+            </div>
+            <div class="chart-card">
+                <div id="chart-funil"></div>
+            </div>
+        </section>
+        <!-- SEÇÃO DA TABELA DETALHADA POR CAMPANHA (FASE 4) -->
+        <section class="table-section">
+            <div class="table-header">
+                <h2>Detalhamento por Campanha</h2>
+                <button id="btn-exportar" class="btn-secondary">
+                    <i class="fa-solid fa-file-csv"></i> Exportar CSV
+                </button>
+            </div>
+            <div class="table-container">
+                <table id="tabela-campanhas">
+                    <thead>
+                        <tr>
+                            <th onclick="ordenarTabela(0)">Cliente <i class="fa-solid fa-sort"></i></th>
+                            <th onclick="ordenarTabela(1)">Plataforma <i class="fa-solid fa-sort"></i></th>
+                            <th onclick="ordenarTabela(2)">Campanha <i class="fa-solid fa-sort"></i></th>
+                            <th onclick="ordenarTabela(3)">Investimento <i class="fa-solid fa-sort"></i></th>
+                            <th onclick="ordenarTabela(4)">Leads <i class="fa-solid fa-sort"></i></th>
+                            <th onclick="ordenarTabela(5)">Vendas <i class="fa-solid fa-sort"></i></th>
+                            <th onclick="ordenarTabela(6)">ROAS <i class="fa-solid fa-sort"></i></th>
+                            <th onclick="ordenarTabela(7)">CPL <i class="fa-solid fa-sort"></i></th>
+                            <th onclick="ordenarTabela(8)">CPA <i class="fa-solid fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-corpo">
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Script JavaScript Principal -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
