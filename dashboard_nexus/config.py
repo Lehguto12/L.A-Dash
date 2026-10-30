@@ -8,8 +8,9 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 IS_PRODUCTION = os.environ.get("RENDER") == "true"
 
 
+
 def _montar_database_uri() -> str:
-    """Escolhe o banco: DATABASE_URL (PostgreSQL no Render) ou SQLite local."""
+    """Escolhe o banco: PostgreSQL no Render ou SQLite local."""
     url = os.environ.get("DATABASE_URL")
 
     if not url:
@@ -17,11 +18,28 @@ def _montar_database_uri() -> str:
         os.makedirs(pasta, exist_ok=True)
         return "sqlite:///" + os.path.join(pasta, "nexus.db")
 
-    # Alguns provedores entregam "postgres://", mas o SQLAlchemy 2 só
-    # aceita "postgresql://". Corrigimos aqui para não quebrar o deploy.
+    # Força o uso do driver psycopg2, já instalado no requirements.txt.
     if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
+        url = url.replace(
+            "postgres://",
+            "postgresql+psycopg2://",
+            1
+        )
+    elif url.startswith("postgresql://"):
+        url = url.replace(
+            "postgresql://",
+            "postgresql+psycopg2://",
+            1
+        )
+    elif url.startswith("postgresql+psycopg://"):
+        url = url.replace(
+            "postgresql+psycopg://",
+            "postgresql+psycopg2://",
+            1
+        )
+
     return url
+
 
 
 class Config:
