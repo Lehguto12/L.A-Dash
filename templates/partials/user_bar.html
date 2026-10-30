@@ -1,0 +1,11 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dados.css') }}">
+<div class="user-bar">
+    <i class="fa-solid fa-user"></i>
+    <span>{{ current_user.nome }}</span>
+    <a href="{{ url_for('dados.pagina') }}" title="Enviar ou atualizar minha planilha"><i class="fa-solid fa-file-arrow-up"></i> Meus dados</a>
+    <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" title="Sair da conta"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+    </form>
+</div>

@@ -1,0 +1,27 @@
+/* Página "Meus dados" e link na barra do usuário. Usa as variáveis de auth.css */
+.dados-body { align-items: flex-start; }
+.dados-card { max-width: 640px; margin: 24px 0; }
+
+.dados-voltar { display: inline-block; margin-bottom: 14px; font-size: 13px; color: var(--text-secondary); text-decoration: none; }
+.dados-voltar:hover { color: var(--accent-violet); }
+
+.dados-resumo { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+.dados-resumo div { flex: 1 1 140px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; }
+.dados-resumo strong { display: block; font-size: 15px; }
+.dados-resumo span, .dados-resumo p { font-size: 12px; color: var(--text-secondary); margin: 0; }
+
+.dados-sub { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
+.dados-txt { font-size: 13px; color: var(--text-secondary); margin: 0 0 10px; }
+.dados-txt code { color: #C4B5FD; word-break: break-word; }
+
+.dados-botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+.dados-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; font-size: 13px; font-weight: 500;
+    color: var(--text-primary); background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; text-decoration: none; }
+.dados-link:hover { border-color: var(--accent-violet); }
+
+.auth-form input[type="file"] { color: var(--text-secondary); font-size: 13px; padding: 10px 0; }
+
+/* Link "Meus dados" dentro da barra do usuário (canto do dashboard) */
+.user-bar a { color: var(--text-primary); text-decoration: none; font-size: 12px; font-weight: 600; padding: 6px 4px; }
+.user-bar a:hover { color: var(--accent-violet); }
+.sheets-status a { color: #a78bfa; }

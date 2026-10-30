@@ -1,0 +1,131 @@
+:root {
+    --bg-main: #0B0F19;
+    --bg-card: #131B2E;
+    --border-color: #1E293B;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --accent-purple: #7C3AED;
+    --accent-violet: #8B5CF6;
+    --green: #10B981;
+    --red: #EF4444;
+
+    /* Usadas pelo tema claro/escuro (os valores do claro estão em tema.css). */
+    --bg-input: #0F172A;
+    --bg-thead: #0F172A;
+    --bg-btn-sec: #1E293B;
+    --bg-btn-sec-hover: #334155;
+    --text-muted: #64748B;
+    --sombra: 0 20px 50px rgba(0, 0, 0, 0.45);
+    --sombra-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Telas de login e cadastro ---------- */
+.auth-body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: var(--sombra);
+}
+
+.auth-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+.auth-logo h1 { font-size: 16px; font-weight: 700; margin: 0; }
+.auth-logo p { font-size: 12px; color: var(--text-secondary); margin: 2px 0 0; }
+.auth-logo-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent-purple); border-radius: 12px; font-size: 20px;
+    color: #fff;
+}
+
+.auth-titulo { font-size: 20px; font-weight: 600; margin: 0 0 18px; }
+
+.auth-form { display: flex; flex-direction: column; gap: 6px; }
+.auth-form label { font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="url"] {
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+}
+.auth-form input:focus { border-color: var(--accent-violet); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25); }
+
+.auth-check { display: flex; align-items: center; gap: 8px; margin-top: 12px !important; cursor: pointer; }
+.auth-check input { accent-color: var(--accent-purple); }
+
+.auth-btn {
+    margin-top: 18px;
+    background: var(--accent-purple);
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.auth-btn:hover { background: var(--accent-violet); }
+
+.auth-rodape { margin: 20px 0 0; font-size: 13px; color: var(--text-secondary); text-align: center; }
+.auth-rodape a { color: var(--accent-violet); text-decoration: none; font-weight: 600; }
+.auth-rodape a:hover { text-decoration: underline; }
+
+.auth-alert { border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; border: 1px solid; }
+.auth-alert-erro  { background: rgba(239, 68, 68, 0.12);  border-color: var(--red);           color: #FCA5A5; }
+.auth-alert-aviso { background: rgba(124, 58, 237, 0.12); border-color: var(--accent-purple); color: #C4B5FD; }
+.auth-alert-info  { background: rgba(16, 185, 129, 0.12); border-color: var(--green);         color: #6EE7B7; }
+
+/* Link da planilha conectada (tela "Meus dados") */
+.sheets-status a { color: var(--accent-violet); }
+
+/* ---------- Barra do usuário no dashboard ---------- */
+.user-bar {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 8px 8px 8px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    box-shadow: var(--sombra-sm);
+}
+.user-bar span { color: var(--text-primary); font-weight: 500; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-bar form { margin: 0; }
+.user-bar button {
+    background: var(--accent-purple);
+    color: #fff;
+    border: 0;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.user-bar button:hover { background: var(--accent-violet); }

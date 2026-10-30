@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus dados · Nexus Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dados.css') }}">
+    <style>
+        /* Estilos da seção Google Sheets (pode mover para dados.css depois). */
+        .sheets-status { margin: 12px 0; padding: 12px 14px; border-radius: 8px;
+                         border: 1px solid rgba(128, 128, 128, .35); font-size: 14px; line-height: 1.5; }
+        .sheets-status .selo { display: inline-block; padding: 2px 8px; border-radius: 999px;
+                               font-size: 12px; font-weight: 600; margin-right: 6px; }
+        .sheets-status .selo-ok { background: rgba(34, 197, 94, .18); color: #16a34a; }
+        .sheets-status .selo-erro { background: rgba(239, 68, 68, .18); color: #dc2626; }
+        .sheets-status .msg { display: block; margin-top: 6px; opacity: .85; }
+        .sheets-acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+        .sheets-acoes form { margin: 0; }
+        .sheets-acoes button { cursor: pointer; }
+    </style>
+        </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tema.css') }}">
+    <script src="{{ url_for('static', filename='js/tema.js') }}"></script>
+</head>
+<body class="auth-body dados-body">
+<main class="auth-card dados-card">
+    <a class="dados-voltar" href="{{ url_for('index') }}"><i class="fa-solid fa-arrow-left"></i> Voltar ao dashboard</a>
+    <h2 class="auth-titulo">Meus dados</h2>
+
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% for categoria, texto in mensagens %}
+            <div class="auth-alert auth-alert-{{ categoria }}">{{ texto }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    {% if erros %}
+        <div class="auth-alert auth-alert-erro">
+            {% for e in erros %}<div>{{ e }}</div>{% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="dados-resumo">
+        {% if resumo.total %}
+            <div><strong>{{ resumo.total }}</strong><span>linhas</span></div>
+            <div><strong>{{ resumo.clientes }}</strong><span>clientes</span></div>
+            <div><strong>{{ resumo.inicio.strftime('%d/%m/%Y') }} a {{ resumo.fim.strftime('%d/%m/%Y') }}</strong><span>período</span></div>
+        {% else %}
+            <p>Você ainda não enviou nenhuma planilha.</p>
+        {% endif %}
+    </section>
+
+    <h3 class="dados-sub">1. Baixe o modelo</h3>
+    <p class="dados-txt">Colunas obrigatórias: <code>{{ colunas | join(', ') }}</code>.</p>
+    <div class="dados-botoes">
+        <a class="dados-link" href="{{ url_for('dados.modelo_xlsx') }}"><i class="fa-solid fa-file-excel"></i> Modelo Excel</a>
+        <a class="dados-link" href="{{ url_for('dados.modelo_csv') }}"><i class="fa-solid fa-file-csv"></i> Modelo CSV</a>
+    </div>
+
+    <h3 class="dados-sub">2. Envie sua planilha</h3>
+    <form method="post" action="{{ url_for('dados.upload') }}" enctype="multipart/form-data"
+          class="auth-form" onsubmit="return confirmarEnvio(this)">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="arquivo">Arquivo (.csv ou .xlsx, até 5 MB)</label>
+        <input type="file" id="arquivo" name="arquivo" accept=".csv,.xlsx" required>
+
+        <label class="auth-check"><input type="radio" name="modo" value="atualizar" checked>
+            Atualizar: soma linhas novas e atualiza as que já existem</label>
+        <label class="auth-check"><input type="radio" name="modo" value="substituir">
+            Substituir: apaga tudo e usa só este arquivo</label>
+        <label class="auth-check"><input type="checkbox" name="ignorar_invalidas">
+            Ignorar linhas inválidas e importar o restante</label>
+
+        <button type="submit" class="auth-btn">Enviar</button>
+    </form>
+
+    <h3 class="dados-sub">3. Ou conecte uma planilha do Google Sheets</h3>
+    <p class="dados-txt">
+        A planilha precisa ter as mesmas colunas do modelo e estar compartilhada como
+        <strong>"Qualquer pessoa com o link" (leitor)</strong>. Cole o link da aba que contém os dados.
+    </p>
+
+    {% if fonte %}
+        <div class="sheets-status">
+            <a href="https://docs.google.com/spreadsheets/d/{{ fonte.sheet_id }}/edit#gid={{ fonte.gid }}"
+               target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-google-drive"></i> Planilha conectada (aba {{ fonte.gid }})
+            </a>
+            <div>Modo: {{ 'substituir (a planilha é a fonte da verdade)' if fonte.modo == 'substituir' else 'atualizar (nunca remove linhas)' }}</div>
+            {% if fonte.ultima_sync %}
+                <div>
+                    Última sincronização: {{ sync_txt }}
+                    {% if fonte.ultimo_status == 'ok' %}
+                        <span class="selo selo-ok">OK</span>
+                    {% else %}
+                        <span class="selo selo-erro">Erro</span>
+                    {% endif %}
+                    <span class="msg">{{ fonte.ultima_mensagem }}</span>
+                </div>
+            {% else %}
+                <div>Ainda não sincronizada.</div>
+            {% endif %}
+        </div>
+
+        <div class="sheets-acoes">
+            <form method="post" action="{{ url_for('dados.sincronizar_sheets') }}"
+                  data-modo="{{ fonte.modo }}" data-tem-dados="{{ 1 if resumo.total else 0 }}"
+                  onsubmit="return confirmarSync(this)">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="dados-link"><i class="fa-solid fa-rotate"></i> Sincronizar agora</button>
+            </form>
+            <form method="post" action="{{ url_for('dados.remover_sheets') }}"
+                  onsubmit="return confirm('Desconectar a planilha? Os dados já importados continuam no painel.')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="dados-link"><i class="fa-solid fa-link-slash"></i> Remover</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('dados.salvar_sheets') }}"
+          class="auth-form" data-tem-dados="{{ 1 if resumo.total else 0 }}"
+          onsubmit="return confirmarSheets(this)">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="link">{{ 'Trocar planilha' if fonte else 'Link da planilha' }}</label>
+        <input type="url" id="link" name="link" required maxlength="500"
+               placeholder="https://docs.google.com/spreadsheets/d/.../edit#gid=0">
+
+        <label class="auth-check"><input type="radio" name="modo" value="substituir"
+            {% if not fonte or fonte.modo == 'substituir' %}checked{% endif %}>
+            Substituir: a planilha é a fonte da verdade (linhas apagadas nela somem do painel)</label>
+        <label class="auth-check"><input type="radio" name="modo" value="atualizar"
+            {% if fonte and fonte.modo == 'atualizar' %}checked{% endif %}>
+            Atualizar: só insere e atualiza, nunca remove</label>
+
+        <button type="submit" class="auth-btn">{{ 'Salvar e sincronizar' if fonte else 'Conectar e sincronizar' }}</button>
+    </form>
+</main>
+
+<script>
+    function confirmarEnvio(form) {
+        if (form.modo.value === "substituir") {
+            return confirm("Isso apaga TODOS os seus dados atuais e usa só este arquivo. Continuar?");
+        }
+        return true;
+    }
+    function confirmarSheets(form) {
+        const temDados = form.dataset.temDados === "1";
+        if (temDados && form.modo.value === "substituir") {
+            return confirm("No modo substituir, seus dados atuais serão apagados e trocados pelo conteúdo da planilha. Continuar?");
+        }
+        return true;
+    }
+    function confirmarSync(form) {
+        const temDados = form.dataset.temDados === "1";
+        if (temDados && form.dataset.modo === "substituir") {
+            return confirm("No modo substituir, seus dados atuais serão trocados pelo conteúdo da planilha. Continuar?");
+        }
+        return true;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,538 @@
+:root {
+    --bg-main: #0B0F19;
+    --bg-card: #131B2E;
+    --border-color: #1E293B;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --accent-purple: #7C3AED;
+    --accent-violet: #8B5CF6;
+    --green: #10B981;
+    --red: #EF4444;
+
+    /* Usadas pelo tema claro/escuro (os valores do claro estão em tema.css). */
+    --bg-input: #0F172A;
+    --bg-thead: #0F172A;
+    --bg-btn-sec: #1E293B;
+    --bg-btn-sec-hover: #334155;
+    --text-muted: #64748B;
+    --sombra: 0 20px 50px rgba(0, 0, 0, 0.45);
+    --sombra-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    padding: 24px;
+}
+
+.dashboard-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* HEADER & FILTROS */
+.header {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.logo-placeholder {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-violet));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
+}
+
+.header h1 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 160px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filter-group select, .filter-group input {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.filter-group select:focus, .filter-group input:focus {
+    border-color: var(--accent-violet);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-violet));
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 41px;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+/* AVISO: usuário ainda sem planilha enviada (o main.js mostra/esconde) */
+.aviso-sem-dados {
+    background-color: var(--bg-card);
+    border: 1px solid var(--accent-purple);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.aviso-sem-dados i,
+.aviso-sem-dados a {
+    color: var(--accent-violet);
+    font-weight: 600;
+}
+
+/* CARDS DE KPI */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.kpi-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.kpi-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.kpi-info h2 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.kpi-trend {
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.kpi-trend.positive {
+    color: var(--green);
+}
+
+.kpi-trend.negative {
+    color: var(--red);
+}
+
+.kpi-trend.neutral {
+    color: var(--text-muted);
+}
+
+.kpi-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+}
+
+.bg-purple { background-color: #4C1D95; }
+.bg-green { background-color: #065F46; }
+.bg-violet { background-color: #5B21B6; }
+.bg-blue { background-color: #1E40AF; }
+.bg-orange { background-color: #9A3412; }
+.bg-pink { background-color: #9D174D; }
+
+@media (max-width: 768px) {
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-group {
+        width: 100%;
+    }
+}
+
+/* ESTILOS DOS GRÁFICOS (FASE 3) */
+.charts-grid-top {
+    display: flex;
+    flex-direction: column;
+}
+
+.charts-grid-bottom {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 16px;
+}
+
+.chart-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.chart-card.full-width {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .charts-grid-bottom {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ESTILOS DA TABELA DE CAMPANHAS (FASE 4) */
+.table-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.btn-secondary {
+    background-color: var(--bg-btn-sec);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-btn-sec-hover);
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+
+th {
+    background-color: var(--bg-thead);
+    color: var(--text-secondary);
+    padding: 12px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th:hover {
+    color: var(--text-primary);
+}
+
+td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+tr.row-warning {
+    background-color: rgba(239, 68, 68, 0.1); /* Destaque sutil em vermelho para ROAS < 1 */
+}
+
+tr.row-warning td:nth-child(7) {
+    color: var(--red);
+    font-weight: 700;
+}
+/* RESPONSIVIDADE E AJUSTES FINAIS (FASE 5) */
+@media (max-width: 1024px) {
+    .dashboard-container {
+        padding: 12px;
+    }
+    .header {
+        padding: 16px;
+    }
+    .kpi-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        gap: 12px;
+    }
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-group {
+        width: 100%;
+        min-width: 100%;
+    }
+    .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    #btn-exportar {
+        width: 100%;
+        justify-content: center;
+    }
+}
+/* ESTILOS DOS GRÁFICOS E CORREÇÃO DE LAYOUT */
+.charts-grid-top {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.charts-grid-bottom {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 16px;
+}
+
+.chart-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    height: 380px; /* Altura fixa controlada para o cartão não esticar */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden; /* Impede que o gráfico vaze para fora do card */
+}
+
+.chart-card.full-width {
+    width: 100%;
+    height: 420px; /* Altura dedicada para o gráfico principal de linhas */
+}
+
+@media (max-width: 768px) {
+    .charts-grid-bottom {
+        grid-template-columns: 1fr;
+    }
+    .chart-card, .chart-card.full-width {
+        height: 350px;
+    }
+}
+
+/* Faz o gráfico ocupar exatamente o card (corrige gráfico deslocado/cortado) */
+.chart-card {
+    justify-content: flex-start;
+}
+
+.chart-card > div[id^="chart-"] {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+/* --- SEÇÃO DE UPLOAD E SHEETS --- */
+.data-actions-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.data-actions-grid {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.sheets-form {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+    min-width: 300px;
+}
+
+.input-sheets {
+    flex: 1;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+}
+
+.input-sheets:focus {
+    border-color: #7C3AED;
+}
+
+.btn-sheets {
+    background-color: #7C3AED;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.btn-sheets:hover {
+    background-color: #6D28D9;
+}
+
+.upload-form input[type="file"] {
+    display: none;
+}
+
+.btn-file-label, .btn-download-modelo {
+    background-color: var(--bg-btn-sec);
+    color: var(--text-primary);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+.btn-file-label:hover, .btn-download-modelo:hover {
+    background-color: var(--bg-btn-sec-hover);
+}
+
+.flash-messages {
+    margin-top: 10px;
+}
+
+.alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.alert-success {
+    background-color: rgba(16, 185, 129, 0.2);
+    border: 1px solid var(--green);
+    color: var(--green);
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.2);
+    border: 1px solid var(--red);
+    color: var(--red);
+}

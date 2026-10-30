@@ -1,0 +1,25 @@
+{% extends "auth_base.html" %}
+{% block titulo %}Entrar{% endblock %}
+
+{% block conteudo %}
+<h2 class="auth-titulo">Entrar na sua conta</h2>
+
+<form method="post" action="{{ url_for('auth.login') }}" class="auth-form" autocomplete="on">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+    <label for="email">E-mail</label>
+    <input type="email" id="email" name="email" value="{{ email }}" required autofocus maxlength="255">
+
+    <label for="senha">Senha</label>
+    <input type="password" id="senha" name="senha" required maxlength="128" autocomplete="current-password">
+
+    <label class="auth-check">
+        <input type="checkbox" name="lembrar"> Manter conectado por 14 dias
+    </label>
+
+    <button type="submit" class="auth-btn">Entrar</button>
+</form>
+
+<p class="auth-rodape">Ainda não tem conta? <a href="{{ url_for('auth.cadastro') }}">Criar conta</a></p>
+{% endblock %}
