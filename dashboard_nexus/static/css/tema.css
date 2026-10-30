@@ -65,3 +65,9 @@
 
 /* No dashboard o botão entra dentro do cabeçalho, alinhado à direita. */
 .btn-tema--cabecalho { margin-left: auto; }
+
+/* Texto das colunas (code): roxo escuro para ter contraste no tema claro. */
+:root[data-tema="claro"] code {
+    color: #6D28D9;
+    background: #EDE9FE;
+}
