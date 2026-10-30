@@ -1,0 +1,13 @@
+instance/
+*.db
+*.sqlite3
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

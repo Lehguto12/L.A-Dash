@@ -4,7 +4,19 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-filtrar").addEventListener("click", () => {
         carregarDashboard();
     });
+
+    document.getElementById("btn-exportar").addEventListener("click", () => {
+        const params = obterParametrosFiltro();
+        window.location.href = `/api/exportar-csv?${params}`;
+    });
 });
+
+const GRAFICOS = {
+    linha_tempo: 'chart-linha-tempo',
+    roas_clientes: 'chart-roas-clientes',
+    investimento_plataforma: 'chart-investimento-plataforma',
+    funil: 'chart-funil'
+};
 
 function formatarMoeda(valor) {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
@@ -14,10 +26,32 @@ function formatarPercentual(valor) {
     return `${valor > 0 ? '+' : ''}${valor.toFixed(2)}%`;
 }
 
+// Os nomes de cliente/campanha vêm de planilhas enviadas por usuários.
+// Ao usar innerHTML, caracteres como < e > precisam ser escapados, senão um
+// nome malicioso poderia injetar HTML/JS na página.
+function escaparHtml(texto) {
+    return String(texto).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function mostrarAvisoSemDados(mostrar) {
+    const aviso = document.getElementById("aviso-sem-dados");
+    if (aviso) aviso.hidden = !mostrar;
+}
+
 async function carregarFiltrosOpcoes() {
     try {
         const response = await fetch('/api/filtros-opcoes');
         const data = await response.json();
+
+        if (data.sem_dados) {
+            mostrarAvisoSemDados(true);
+            limparGraficos();
+            carregarKPIs();   // mostra zeros em vez de deixar valores antigos
+            return;
+        }
+        mostrarAvisoSemDados(false);
 
         const selectCliente = document.getElementById("filtro-cliente");
         data.clientes.forEach(cliente => {
@@ -56,6 +90,15 @@ async function carregarKPIs() {
     }
 }
 
+function limparGraficos() {
+    Object.values(GRAFICOS).forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        Plotly.purge(el);   // remove o gráfico antigo da memória
+        el.innerHTML = '<p style="color:#64748B;text-align:center;padding:60px 0;font-size:14px;">Sem dados para exibir</p>';
+    });
+}
+
 async function carregarGraficos() {
     const params = obterParametrosFiltro();
     try {
@@ -65,18 +108,18 @@ async function carregarGraficos() {
         // Configuração para ocultar a barra de ferramentas e forçar responsividade total
         const configGrafico = { displayModeBar: false, responsive: true };
 
-        if (data.linha_tempo && Object.keys(data.linha_tempo).length > 0) {
-            Plotly.react('chart-linha-tempo', data.linha_tempo.data, data.linha_tempo.layout, configGrafico);
-        }
-        if (data.roas_clientes && Object.keys(data.roas_clientes).length > 0) {
-            Plotly.react('chart-roas-clientes', data.roas_clientes.data, data.roas_clientes.layout, configGrafico);
-        }
-        if (data.investimento_plataforma && Object.keys(data.investimento_plataforma).length > 0) {
-            Plotly.react('chart-investimento-plataforma', data.investimento_plataforma.data, data.investimento_plataforma.layout, configGrafico);
-        }
-        if (data.funil && Object.keys(data.funil).length > 0) {
-            Plotly.react('chart-funil', data.funil.data, data.funil.layout, configGrafico);
-        }
+        Object.entries(GRAFICOS).forEach(([chave, id]) => {
+            const fig = data[chave];
+            const el = document.getElementById(id);
+            if (fig && Object.keys(fig).length > 0) {
+                el.innerHTML = "";   // tira o aviso "Sem dados" se existir
+                Plotly.react(id, fig.data, fig.layout, configGrafico);
+            } else {
+                // Filtro sem resultado: limpa o gráfico antigo em vez de deixá-lo na tela
+                Plotly.purge(el);
+                el.innerHTML = '<p style="color:#64748B;text-align:center;padding:60px 0;font-size:14px;">Sem dados para o filtro escolhido</p>';
+            }
+        });
 
         // Força o redimensionamento automático de todos os gráficos na tela
         setTimeout(() => {
@@ -137,35 +180,31 @@ function carregarDashboard() {
     carregarTabelaCampanhas();
 }
 
-// Event listener para o botão de exportar CSV
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("btn-exportar").addEventListener("click", () => {
-        const params = obterParametrosFiltro();
-        window.location.href = `/api/exportar-csv?${params}`;
-    });
-});
-
 async function carregarTabelaCampanhas() {
     const params = obterParametrosFiltro();
     try {
         const response = await fetch(`/api/tabela-campanhas?${params}`);
         const dados = await response.json();
-        
+
         const tbody = document.getElementById("tabela-corpo");
         tbody.innerHTML = "";
 
         dados.forEach(item => {
             const tr = document.createElement("tr");
-            
+
             // Destaca em vermelho suave campanhas com ROAS abaixo de 1
             if (item.roas < 1.0) {
                 tr.className = "row-warning";
             }
 
+            const cliente = escaparHtml(item.cliente);
+            const plataforma = escaparHtml(item.plataforma);
+            const campanha = escaparHtml(item.campanha);
+
             tr.innerHTML = `
-                <td data-v="${item.cliente}">${item.cliente}</td>
-                <td data-v="${item.plataforma}">${item.plataforma}</td>
-                <td data-v="${item.campanha}">${item.campanha}</td>
+                <td data-v="${cliente}">${cliente}</td>
+                <td data-v="${plataforma}">${plataforma}</td>
+                <td data-v="${campanha}">${campanha}</td>
                 <td data-v="${item.investimento}">${formatarMoeda(item.investimento)}</td>
                 <td data-v="${item.leads}">${item.leads}</td>
                 <td data-v="${item.vendas}">${item.vendas}</td>

@@ -12,6 +12,9 @@
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tema.css') }}">
+    <script src="{{ url_for('static', filename='js/tema.js') }}"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -58,6 +61,15 @@
                 </button>
             </div>
         </header>
+
+        <!-- AVISO: usuário ainda sem planilha enviada (o main.js mostra/esconde) -->
+        <div id="aviso-sem-dados" hidden
+             style="background:#1E293B;border:1px solid #7C3AED;border-radius:12px;padding:16px 20px;margin-bottom:20px;color:#E2E8F0;">
+            <i class="fa-solid fa-file-arrow-up" style="color:#A78BFA;"></i>
+            Você ainda não enviou nenhuma planilha.
+            <a href="{{ url_for('dados.pagina') }}" style="color:#A78BFA;font-weight:600;">Enviar meus dados</a>
+            para ver o seu painel.
+        </div>
 
         <!-- CARDS DE KPI -->
         <section class="kpi-grid">
@@ -116,7 +128,7 @@
             </div>
         </section>
 
-        <!-- SEÇÃO DE GRÁFICOS (FASE 3) -->
+        <!-- SEÇÃO DE GRÁFICOS -->
         <section class="charts-grid-top">
             <div class="chart-card full-width">
                 <div id="chart-linha-tempo"></div>
@@ -134,7 +146,8 @@
                 <div id="chart-funil"></div>
             </div>
         </section>
-        <!-- SEÇÃO DA TABELA DETALHADA POR CAMPANHA (FASE 4) -->
+
+        <!-- SEÇÃO DA TABELA DETALHADA POR CAMPANHA -->
         <section class="table-section">
             <div class="table-header">
                 <h2>Detalhamento por Campanha</h2>
@@ -166,7 +179,9 @@
 
     </div>
 
-    <!-- Script JavaScript Principal -->
+    <!-- Script JavaScript Principal (carregado UMA vez) -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    {% include "partials/user_bar.html" %}
 </body>
 </html>

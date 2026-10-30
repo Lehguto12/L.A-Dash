@@ -1,7 +1,16 @@
 import io
+import os
+
 import pandas as pd
 from flask import Flask, jsonify, request, render_template, make_response
-from services.data_loader import carregar_dados
+from flask_login import login_required, current_user
+
+from config import Config, IS_PRODUCTION
+from comandos import sincronizar_sheets_cmd
+from extensions import db, migrate, login_manager, csrf
+from auth import auth_bp
+from uploads import dados_bp
+from services.data_loader import carregar_dados_do_usuario
 from services.kpi_calculator import calcular_kpis
 from services.filtros import filtrar_dataframe
 from services.chart_builder import (
@@ -11,20 +20,82 @@ from services.chart_builder import (
     gerar_grafico_funil
 )
 
-app = Flask(__name__)
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    # SECRET_KEY assina o cookie de sessão. Se vazar, qualquer um forja um login.
+    if not app.config.get("SECRET_KEY"):
+        if IS_PRODUCTION:
+            raise RuntimeError("Defina a variável de ambiente SECRET_KEY no Render.")
+        app.config["SECRET_KEY"] = "chave-apenas-para-desenvolvimento-local"
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+    csrf.init_app(app)
+
+    login_manager.init_app(app)
+    login_manager.login_view = "auth.login"
+    login_manager.session_protection = "strong"
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(dados_bp)
+    app.cli.add_command(sincronizar_sheets_cmd)
+    return app
+
+
+app = create_app()
+
+
+def _df_do_usuario() -> pd.DataFrame:
+    """ÚNICO ponto por onde os dados entram nas rotas /api/*.
+
+    O usuario_id vem de current_user (sessão assinada pelo servidor), nunca de
+    request.args, request.form ou do JavaScript. Como todas as rotas passam por
+    aqui, não existe caminho para ler dado de outro usuário."""
+    return carregar_dados_do_usuario(current_user.id)
+
+
+def _filtros_da_requisicao():
+    """Filtros de tela (datas, cliente, plataforma). Estes SIM vêm da URL,
+    mas só restringem ainda mais os dados do próprio usuário."""
+    return (
+        request.args.get('inicio'),
+        request.args.get('fim'),
+        request.args.get('cliente'),
+        request.args.get('plataforma'),
+    )
+
 
 @app.route('/')
+@login_required
 def index():
     return render_template('index.html')
 
+
 @app.route('/api/filtros-opcoes', methods=['GET'])
+@login_required
 def obter_filtros():
-    df = carregar_dados()
+    df = _df_do_usuario()
+
+    # Usuário sem planilha enviada: avisamos o front em vez de quebrar.
+    if df.empty:
+        return jsonify({
+            'sem_dados': True,
+            'clientes': [],
+            'plataformas': [],
+            'data_min': None,
+            'data_max': None,
+            'data_inicio_padrao': None
+        })
+
     data_max = df['data'].max()
     data_min = df['data'].min()
     # Período padrão: últimos 90 dias, para sobrar histórico anterior para a comparação "vs ant."
     inicio_padrao = max(data_min, (pd.to_datetime(data_max) - pd.Timedelta(days=89)).strftime('%Y-%m-%d'))
     return jsonify({
+        'sem_dados': False,
         'clientes': sorted(df['cliente'].unique().tolist()),
         'plataformas': sorted(df['plataforma'].unique().tolist()),
         'data_min': data_min,
@@ -32,23 +103,21 @@ def obter_filtros():
         'data_inicio_padrao': inicio_padrao
     })
 
+
 @app.route('/api/kpis', methods=['GET'])
+@login_required
 def api_kpis():
-    df = carregar_dados()
-    inicio = request.args.get('inicio')
-    fim = request.args.get('fim')
-    cliente = request.args.get('cliente')
-    plataforma = request.args.get('plataforma')
+    df = _df_do_usuario()
+    inicio, fim, cliente, plataforma = _filtros_da_requisicao()
     return jsonify(calcular_kpis(df, inicio_str=inicio, fim_str=fim, cliente=cliente, plataforma=plataforma))
 
+
 @app.route('/api/charts', methods=['GET'])
+@login_required
 def api_charts():
     """Endpoint que retorna todos os gráficos em JSON gerados pelo Plotly."""
-    df = carregar_dados()
-    inicio = request.args.get('inicio')
-    fim = request.args.get('fim')
-    cliente = request.args.get('cliente')
-    plataforma = request.args.get('plataforma')
+    df = _df_do_usuario()
+    inicio, fim, cliente, plataforma = _filtros_da_requisicao()
 
     return jsonify({
         'linha_tempo': gerar_grafico_linha_tempo(df, inicio, fim, cliente, plataforma),
@@ -57,14 +126,13 @@ def api_charts():
         'funil': gerar_grafico_funil(df, inicio, fim, cliente, plataforma)
     })
 
+
 @app.route('/api/tabela-campanhas', methods=['GET'])
+@login_required
 def api_tabela_campanhas():
     """Retorna os dados consolidados por campanha para preencher a tabela."""
-    df = carregar_dados()
-    inicio = request.args.get('inicio')
-    fim = request.args.get('fim')
-    cliente = request.args.get('cliente')
-    plataforma = request.args.get('plataforma')
+    df = _df_do_usuario()
+    inicio, fim, cliente, plataforma = _filtros_da_requisicao()
 
     df_f = filtrar_dataframe(df, inicio, fim, cliente, plataforma)
     if df_f.empty:
@@ -105,14 +173,13 @@ def api_tabela_campanhas():
 
     return jsonify(resultado)
 
+
 @app.route('/api/exportar-csv', methods=['GET'])
+@login_required
 def exportar_csv():
     """Exporta a tabela filtrada em formato CSV."""
-    df = carregar_dados()
-    inicio = request.args.get('inicio')
-    fim = request.args.get('fim')
-    cliente = request.args.get('cliente')
-    plataforma = request.args.get('plataforma')
+    df = _df_do_usuario()
+    inicio, fim, cliente, plataforma = _filtros_da_requisicao()
 
     df_f = filtrar_dataframe(df, inicio, fim, cliente, plataforma)
     if df_f.empty:
@@ -137,6 +204,7 @@ def exportar_csv():
     response.headers["Content-Type"] = "text/csv; charset=utf-8-sig"
     return response
 
+
 if __name__ == '__main__':
-    print("🚀 Iniciando servidor Nexus Dashboard (Fase 4)...")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # debug só liga se você pedir (FLASK_DEBUG=1). Em produção o gunicorn nem usa este bloco.
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1", host="127.0.0.1", port=5000)

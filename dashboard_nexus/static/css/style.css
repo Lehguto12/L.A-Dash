@@ -8,6 +8,15 @@
     --accent-violet: #8B5CF6;
     --green: #10B981;
     --red: #EF4444;
+
+    /* Usadas pelo tema claro/escuro (os valores do claro estão em tema.css). */
+    --bg-input: #0F172A;
+    --bg-thead: #0F172A;
+    --bg-btn-sec: #1E293B;
+    --bg-btn-sec-hover: #334155;
+    --text-muted: #64748B;
+    --sombra: 0 20px 50px rgba(0, 0, 0, 0.45);
+    --sombra-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -94,7 +103,7 @@ body {
 }
 
 .filter-group select, .filter-group input {
-    background-color: #0F172A;
+    background-color: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     padding: 10px 12px;
@@ -125,6 +134,22 @@ body {
 
 .btn-primary:hover {
     opacity: 0.9;
+}
+
+/* AVISO: usuário ainda sem planilha enviada (o main.js mostra/esconde) */
+.aviso-sem-dados {
+    background-color: var(--bg-card);
+    border: 1px solid var(--accent-purple);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.aviso-sem-dados i,
+.aviso-sem-dados a {
+    color: var(--accent-violet);
+    font-weight: 600;
 }
 
 /* CARDS DE KPI */
@@ -178,7 +203,7 @@ body {
 }
 
 .kpi-trend.neutral {
-    color: #64748B;
+    color: var(--text-muted);
 }
 
 .kpi-icon {
@@ -265,7 +290,7 @@ body {
 }
 
 .btn-secondary {
-    background-color: #1E293B;
+    background-color: var(--bg-btn-sec);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     padding: 8px 16px;
@@ -279,7 +304,7 @@ body {
 }
 
 .btn-secondary:hover {
-    background-color: #334155;
+    background-color: var(--bg-btn-sec-hover);
 }
 
 .table-container {
@@ -294,7 +319,7 @@ table {
 }
 
 th {
-    background-color: #0F172A;
+    background-color: var(--bg-thead);
     color: var(--text-secondary);
     padding: 12px 16px;
     font-weight: 600;
@@ -412,4 +437,102 @@ tr.row-warning td:nth-child(7) {
     width: 100%;
     height: 100%;
     min-height: 0;
+}
+
+/* --- SEÇÃO DE UPLOAD E SHEETS --- */
+.data-actions-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.data-actions-grid {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.sheets-form {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+    min-width: 300px;
+}
+
+.input-sheets {
+    flex: 1;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+}
+
+.input-sheets:focus {
+    border-color: #7C3AED;
+}
+
+.btn-sheets {
+    background-color: #7C3AED;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.btn-sheets:hover {
+    background-color: #6D28D9;
+}
+
+.upload-form input[type="file"] {
+    display: none;
+}
+
+.btn-file-label, .btn-download-modelo {
+    background-color: var(--bg-btn-sec);
+    color: var(--text-primary);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+.btn-file-label:hover, .btn-download-modelo:hover {
+    background-color: var(--bg-btn-sec-hover);
+}
+
+.flash-messages {
+    margin-top: 10px;
+}
+
+.alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.alert-success {
+    background-color: rgba(16, 185, 129, 0.2);
+    border: 1px solid var(--green);
+    color: var(--green);
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.2);
+    border: 1px solid var(--red);
+    color: var(--red);
 }

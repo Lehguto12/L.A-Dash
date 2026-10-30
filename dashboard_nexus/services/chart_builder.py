@@ -7,13 +7,33 @@ import plotly.graph_objects as go
 
 from services.filtros import filtrar_dataframe
 
-PL_BG_COLOR = '#131B2E'
-GRID_COLOR = '#1E293B'
-TEXT_COLOR = '#F8FAFC'
 ROXO = '#7C3AED'
 VERDE = '#10B981'
 AZUL = '#3B82F6'
 COR_PLATAFORMA = {'Google Ads': ROXO, 'Meta Ads': AZUL}
+
+# Cores dos gráficos em cada tema. O fundo do gráfico acompanha o fundo do
+# card (--bg-card) definido no CSS.
+PALETAS = {
+    'escuro': dict(
+        bg='#131B2E', grid='#1E293B', texto='#F8FAFC', suave='#64748B',
+        seletor='#1E293B', seletor_ativo='#7C3AED',
+    ),
+    'claro': dict(
+        bg='#FFFFFF', grid='#E2E8F0', texto='#0F172A', suave='#64748B',
+        seletor='#E2E8F0', seletor_ativo='#C4B5FD',
+    ),
+}
+
+# Mantidos por compatibilidade (valores do tema escuro, o padrão).
+PL_BG_COLOR = PALETAS['escuro']['bg']
+GRID_COLOR = PALETAS['escuro']['grid']
+TEXT_COLOR = PALETAS['escuro']['texto']
+
+
+def _paleta(tema) -> dict:
+    """Qualquer valor desconhecido cai no tema escuro (nunca quebra)."""
+    return PALETAS.get(tema, PALETAS['escuro'])
 
 
 # ---------------------------------------------------------------------------
@@ -51,12 +71,12 @@ def _fmt_dec(n, casas=2) -> str:
     return f"{n:.{casas}f}".replace('.', ',')
 
 
-def _layout_base(titulo: str, **extra) -> dict:
+def _layout_base(titulo: str, p: dict, **extra) -> dict:
     layout = dict(
         title=dict(text=titulo, x=0.02, xanchor='left', font=dict(size=15)),
-        paper_bgcolor=PL_BG_COLOR,
-        plot_bgcolor=PL_BG_COLOR,
-        font=dict(color=TEXT_COLOR, family='Inter, sans-serif'),
+        paper_bgcolor=p['bg'],
+        plot_bgcolor=p['bg'],
+        font=dict(color=p['texto'], family='Inter, sans-serif'),
         separators=',.',  # pt-BR: vírgula decimal, ponto de milhar
     )
     layout.update(extra)
@@ -64,9 +84,10 @@ def _layout_base(titulo: str, **extra) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Gráficos
+# Gráficos (o último parâmetro, `tema`, é 'escuro' ou 'claro')
 # ---------------------------------------------------------------------------
-def gerar_grafico_linha_tempo(df, inicio, fim, cliente, plataforma) -> dict:
+def gerar_grafico_linha_tempo(df, inicio, fim, cliente, plataforma, tema='escuro') -> dict:
+    p = _paleta(tema)
     df_f = filtrar_dataframe(df, inicio, fim, cliente, plataforma)
     if df_f.empty:
         return {}
@@ -95,35 +116,36 @@ def gerar_grafico_linha_tempo(df, inicio, fim, cliente, plataforma) -> dict:
     ))
 
     fig.update_layout(**_layout_base(
-        'Evolução Diária: Investimento x Faturamento',
+        'Evolução Diária: Investimento x Faturamento', p,
         autosize=True,
         margin=dict(t=100, b=40, l=70, r=20),
         hovermode='x unified',
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, traceorder='reversed'),
         xaxis=dict(
             type='date', tickformat='%d/%m', hoverformat='%d/%m/%Y',
-            showgrid=True, gridcolor=GRID_COLOR, zeroline=False,
+            showgrid=True, gridcolor=p['grid'], zeroline=False,
             rangeselector=dict(
                 buttons=[
                     dict(count=7, label='7d', step='day', stepmode='backward'),
                     dict(count=30, label='30d', step='day', stepmode='backward'),
                     dict(step='all', label='Tudo'),
                 ],
-                bgcolor='#1E293B', activecolor='#7C3AED',
-                font=dict(color=TEXT_COLOR),
+                bgcolor=p['seletor'], activecolor=p['seletor_ativo'],
+                font=dict(color=p['texto']),
                 x=0, y=1.02, yanchor='bottom',
             ),
         ),
         yaxis=dict(
             tickprefix='R$ ', tickformat=',.0f', showgrid=True,
-            gridcolor=GRID_COLOR, zeroline=False, rangemode='tozero',
+            gridcolor=p['grid'], zeroline=False, rangemode='tozero',
             fixedrange=True,
         ),
     ))
     return _fig_para_dict(fig)
 
 
-def gerar_grafico_roas_clientes(df, inicio, fim, cliente, plataforma) -> dict:
+def gerar_grafico_roas_clientes(df, inicio, fim, cliente, plataforma, tema='escuro') -> dict:
+    p = _paleta(tema)
     df_f = filtrar_dataframe(df, inicio, fim, cliente, plataforma)
     if df_f.empty:
         return {}
@@ -139,7 +161,7 @@ def gerar_grafico_roas_clientes(df, inicio, fim, cliente, plataforma) -> dict:
     fig = go.Figure(go.Bar(
         x=roas, y=clientes, orientation='h',
         text=rotulos, textposition='outside', cliponaxis=False,
-        textfont=dict(color=TEXT_COLOR, size=11),
+        textfont=dict(color=p['texto'], size=11),
         marker=dict(color=roas, cmin=0, cmax=max(max(roas), 1),
                     colorscale=[[0, '#4C1D95'], [1, '#A78BFA']]),
         hovertemplate='%{y}<br>ROAS: %{x:.2f}x<extra></extra>'
@@ -148,17 +170,18 @@ def gerar_grafico_roas_clientes(df, inicio, fim, cliente, plataforma) -> dict:
     fig.add_vline(x=1, line_dash='dot', line_color='#F59E0B', line_width=1)
 
     fig.update_layout(**_layout_base(
-        'ROAS por Cliente',
+        'ROAS por Cliente', p,
         margin=dict(t=40, b=40, l=10, r=50),
         showlegend=False,
         xaxis=dict(title='ROAS (x)', range=[0, max(roas) * 1.25 if max(roas) > 0 else 1],
-                   showgrid=True, gridcolor=GRID_COLOR, zeroline=False, fixedrange=True),
+                   showgrid=True, gridcolor=p['grid'], zeroline=False, fixedrange=True),
         yaxis=dict(automargin=True, showgrid=False, fixedrange=True),
     ))
     return _fig_para_dict(fig)
 
 
-def gerar_grafico_investimento_plataforma(df, inicio, fim, cliente, plataforma) -> dict:
+def gerar_grafico_investimento_plataforma(df, inicio, fim, cliente, plataforma, tema='escuro') -> dict:
+    p = _paleta(tema)
     df_f = filtrar_dataframe(df, inicio, fim, cliente, plataforma)
     if df_f.empty:
         return {}
@@ -166,26 +189,27 @@ def gerar_grafico_investimento_plataforma(df, inicio, fim, cliente, plataforma) 
     d = df_f.groupby('plataforma')['investimento'].sum().reset_index()
     labels = d['plataforma'].tolist()
     valores = [round(float(v), 2) for v in d['investimento']]
-    cores = [COR_PLATAFORMA.get(p, VERDE) for p in labels]
+    cores = [COR_PLATAFORMA.get(pl, VERDE) for pl in labels]
     total = sum(valores)
 
     fig = go.Figure(go.Pie(
         labels=labels, values=valores, hole=0.55, sort=False,
-        marker=dict(colors=cores, line=dict(color=PL_BG_COLOR, width=2)),
+        marker=dict(colors=cores, line=dict(color=p['bg'], width=2)),
         textinfo='percent', textfont=dict(color='#FFFFFF', size=13),
         hovertemplate='%{label}<br>R$ %{value:,.2f}<br>%{percent}<extra></extra>'
     ))
     fig.update_layout(**_layout_base(
-        'Investimento por Plataforma',
+        'Investimento por Plataforma', p,
         margin=dict(t=40, b=20, l=20, r=20),
         legend=dict(orientation='h', yanchor='bottom', y=-0.12, xanchor='center', x=0.5),
         annotations=[dict(text=f"<b>R$ {_fmt_int(total)}</b><br><span style='font-size:11px'>total</span>",
-                          x=0.5, y=0.5, showarrow=False, font=dict(size=15, color=TEXT_COLOR))],
+                          x=0.5, y=0.5, showarrow=False, font=dict(size=15, color=p['texto']))],
     ))
     return _fig_para_dict(fig)
 
 
-def gerar_grafico_funil(df, inicio, fim, cliente, plataforma) -> dict:
+def gerar_grafico_funil(df, inicio, fim, cliente, plataforma, tema='escuro') -> dict:
+    p = _paleta(tema)
     df_f = filtrar_dataframe(df, inicio, fim, cliente, plataforma)
     if df_f.empty:
         return {}
@@ -212,14 +236,14 @@ def gerar_grafico_funil(df, inicio, fim, cliente, plataforma) -> dict:
         textfont=dict(color='#FFFFFF', size=11),
         hovertext=[f"{e}: {_fmt_int(v)}" for e, v in zip(etapas, valores)], hoverinfo='text',
         marker=dict(color=['#4C1D95', '#5B21B6', '#7C3AED', '#8B5CF6']),
-        connector=dict(line=dict(color=GRID_COLOR))
+        connector=dict(line=dict(color=p['grid']))
     ))
     fig.update_layout(**_layout_base(
-        'Funil de Conversão Geral',
+        'Funil de Conversão Geral', p,
         margin=dict(t=40, b=30, l=20, r=20),
         annotations=[dict(text='Largura das etapas em escala logarítmica', x=0.5, y=-0.07,
                           xref='paper', yref='paper', showarrow=False,
-                          font=dict(size=10, color='#64748B'))],
+                          font=dict(size=10, color=p['suave']))],
     ))
     fig.update_xaxes(visible=False, fixedrange=True)
     fig.update_yaxes(fixedrange=True)
