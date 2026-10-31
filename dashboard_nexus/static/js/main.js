@@ -111,9 +111,17 @@ async function carregarGraficos() {
         Object.entries(GRAFICOS).forEach(([chave, id]) => {
             const fig = data[chave];
             const el = document.getElementById(id);
+            if (!el) return;
+
             if (fig && Object.keys(fig).length > 0) {
+                // CORREÇÃO: o Plotly guarda estado interno na própria <div>.
+                // Se apagarmos o conteúdo com innerHTML sem avisar o Plotly,
+                // o Plotly.react acha que o gráfico ainda está lá e não
+                // redesenha nada (caixa vazia). Por isso: purge -> limpar
+                // -> newPlot, que desenha do zero em toda atualização.
+                Plotly.purge(el);
                 el.innerHTML = "";   // tira o aviso "Sem dados" se existir
-                Plotly.react(id, fig.data, fig.layout, configGrafico);
+                Plotly.newPlot(el, fig.data, fig.layout, configGrafico);
             } else {
                 // Filtro sem resultado: limpa o gráfico antigo em vez de deixá-lo na tela
                 Plotly.purge(el);
