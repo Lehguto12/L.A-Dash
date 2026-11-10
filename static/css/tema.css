@@ -1,0 +1,67 @@
+/* Tema claro/escuro.
+ *
+ * O tema ESCURO continua definido no :root do style.css e do auth.css (é o
+ * padrão). Aqui ficam só as sobreposições do tema CLARO e o botão de alternar.
+ * `:root[data-tema="claro"]` é mais específico que `:root`, então vence
+ * independente da ordem em que os arquivos são carregados.
+ */
+
+:root[data-tema="escuro"] { color-scheme: dark; }
+
+:root[data-tema="claro"] {
+    color-scheme: light;
+
+    --bg-main: #F1F5F9;
+    --bg-card: #FFFFFF;
+    --border-color: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --accent-violet: #6D28D9;
+    --green: #059669;
+    --red: #DC2626;
+
+    --bg-input: #F8FAFC;
+    --bg-thead: #F1F5F9;
+    --bg-btn-sec: #E2E8F0;
+    --bg-btn-sec-hover: #CBD5E1;
+    --text-muted: #64748B;
+    --sombra: 0 20px 50px rgba(15, 23, 42, 0.12);
+    --sombra-sm: 0 8px 24px rgba(15, 23, 42, 0.15);
+}
+
+/* Alertas: no claro, o texto precisa ser escuro para ter contraste. */
+:root[data-tema="claro"] .auth-alert-erro  { color: #B91C1C; }
+:root[data-tema="claro"] .auth-alert-aviso { color: #6D28D9; }
+:root[data-tema="claro"] .auth-alert-info  { color: #047857; }
+
+/* ---------- Botão de alternar tema ---------- */
+.btn-tema {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+.btn-tema:hover { border-color: var(--accent-violet); }
+.btn-tema:focus-visible { outline: 2px solid var(--accent-violet); outline-offset: 2px; }
+.btn-tema svg { width: 20px; height: 20px; }
+
+/* Páginas sem cabeçalho (login, cadastro, meus dados): canto superior direito. */
+.btn-tema--fixo {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1100;
+    box-shadow: var(--sombra-sm);
+}
+
+/* No dashboard o botão entra dentro do cabeçalho, alinhado à direita. */
+.btn-tema--cabecalho { margin-left: auto; }

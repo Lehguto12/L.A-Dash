@@ -1,11 +1,18 @@
+# Banco local (cada pessoa/ambiente tem o seu; o de produção é o PostgreSQL)
 instance/
 *.db
 *.sqlite3
+
+# Ambiente virtual e caches do Python
 .venv/
 venv/
 __pycache__/
 *.pyc
+
+# Segredos: NUNCA vão para o GitHub
 .env
+
+# Arquivos de editor e de sistema
 .vscode/
 .idea/
 Thumbs.db

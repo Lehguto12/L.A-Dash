@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Nexus</title>
+  <style>
+    body { margin: 0; padding: 32px; background: #131B2E; color: #E5E7EB;
+           font-family: system-ui, sans-serif; }
+    h1 { margin: 0 0 4px; }
+    p.sub { margin: 0 0 24px; color: #9CA3AF; }
+    a { color: #A78BFA; }
+    table { width: 100%; border-collapse: collapse; background: #1B2540;
+            border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #2A3558; }
+    th { background: #7C3AED; color: #fff; font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px;
+           background: #2A3558; font-size: 12px; }
+    .tag.admin { background: #7C3AED; color: #fff; }
+    .aviso { padding: 12px 16px; margin-bottom: 16px; border-radius: 8px;
+             background: #1B2540; border: 1px solid #7C3AED; }
+    .form-plano { display: flex; gap: 8px; align-items: center; margin: 0; }
+    .form-plano select { padding: 6px 8px; border-radius: 6px; border: 1px solid #2A3558;
+                         background: #131B2E; color: #E5E7EB; }
+    .form-plano button { padding: 6px 12px; border: none; border-radius: 6px;
+                         background: #7C3AED; color: #fff; font-weight: 600; cursor: pointer; }
+    .form-plano button:hover { background: #6D28D9; }
+  </style>
+</head>
+<body>
+  <h1>Painel administrativo</h1>
+  <p class="sub">{{ linhas|length }} usuário(s) cadastrado(s) · <a href="/">Voltar ao dashboard</a></p>
+
+  {% with mensagens = get_flashed_messages(with_categories=true) %}
+    {% for categoria, texto in mensagens %}
+      <div class="aviso">{{ texto }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>Plano</th>
+        <th>Clientes em uso</th>
+        <th>Cadastro</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in linhas %}
+      <tr>
+        <td>{{ l.nome }} {% if l.is_admin %}<span class="tag admin">admin</span>{% endif %}</td>
+        <td>{{ l.email }}</td>
+        <td>
+          <form class="form-plano" method="post" action="{{ url_for('admin.alterar_plano', usuario_id=l.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="plano">
+              {% for chave, nome in planos %}
+              <option value="{{ chave }}" {% if chave == l.plano_chave %}selected{% endif %}>{{ nome }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit">Salvar</button>
+          </form>
+        </td>
+        <td>{{ l.clientes }} / {{ l.limite if l.limite is not none else "ilimitado" }}</td>
+        <td>{{ l.criado_em.strftime('%d/%m/%Y') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

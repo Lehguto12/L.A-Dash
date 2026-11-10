@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de privacidade · L.A Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tema.css') }}">
+    <script src="{{ url_for('static', filename='js/tema.js') }}"></script>
+</head>
+<body class="auth-body">
+<main class="auth-card">
+    <h2 class="auth-titulo">Política de privacidade</h2>
+
+    <h3>Quais dados coletamos</h3>
+    <p>Nome, e-mail, senha (armazenada apenas como hash, nunca em texto puro) e as planilhas que você envia ou conecta.</p>
+
+    <h3>Para que usamos</h3>
+    <p>Apenas para autenticar você e montar o seu painel. Não vendemos nem compartilhamos seus dados com terceiros.</p>
+
+    <h3>Google Sheets</h3>
+    <p>Se você conectar uma planilha, lemos somente o conteúdo da aba indicada, via link público de leitura.</p>
+
+    <h3>Seus direitos (LGPD, art. 18)</h3>
+    <p>Você pode acessar, corrigir e excluir seus dados. A exclusão completa da conta e dos dados está em
+       <strong>Meus dados → Excluir minha conta</strong>.</p>
+
+    <h3>Backups</h3>
+    <p>Cópias de segurança podem reter dados por um período limitado após a exclusão, até serem substituídas.</p>
+
+    <h3>Contato</h3>
+    <p>leh.guto@outlook.com</p>
+
+    <p><a href="{{ url_for('auth.login') }}">Voltar</a></p>
+</main>
+</body>
+</html>
